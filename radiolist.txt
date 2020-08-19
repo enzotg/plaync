@@ -1,0 +1,10 @@
+https://stream2.305streamcdn.com/rockandpop,Rockandpop
+https://15903.live.streamtheworld.com/CONTINENTALAAC.aac,Continental
+http://mp3.metroaudio1.stream.avstreaming.net:7200/metro,Metro
+http://147.135.11.82:9300/;,Vorterix
+http://192.99.38.174:9342/stream,Am750
+https://server1.stweb.tv/rcvos/live/playlist.m3u8,Radioconvos
+popradio.stweb.tv:1935/popradio/live/playlist.m3u8,Pop
+https://s6.stweb.tv/radio10/live/playlist.m3u8,Radio10
+https://panel.dattalive.com/MetropolitanaFM/MetropolitanaFM/chunklist_w1995863498.m3u8,Metropolitana935
+http://184.107.35.153:8032/stream,Lv12
