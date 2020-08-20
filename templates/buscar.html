@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+{% block title %}
+<title>Buscar</title>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    
+    <div  >
+        <input type="text" id="txtbuscar" class="" />
+        <input type="button" value="Buscar" id="btnbuscar"  class="btn btn-sm btn-primary">
+    </div>
+
+    <hr/>
+    <div id="divres">
+
+    </div>
+    <hr/>
+    <strong>Carpetas</strong>
+    <div id="divresc">
+
+    </div>
+
+
+    <hr/>  
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+    window.onload=function(){
+
+        document.getElementById("btnbuscar").addEventListener("click" , buscar);
+        getcarp();
+    }
+    function buscar(e){
+        
+        var text = document.getElementById("txtbuscar").value;
+        
+        $.ajax({
+            type : 'POST',
+            url : "{{url_for('buscarn')}}",
+            contentType: 'application/json;charset=UTF-8',
+            data: text,            
+            success: function (data) {      
+                datos = JSON.parse(data);
+                datos.forEach(fn);
+                }                    
+        });             
+        
+        var divres = document.getElementById("divres");    
+        divres.innerHTML="";                               
+        function fn(element, index) {
+            var rowa = document.createElement("div");
+            var rowb = document.createElement("div");
+            var rowc = document.createElement("div");
+            var a = document.createElement("a");
+            
+            a.href="../?c=" + element[2] + "";
+            a.innerText = element[0] ;
+            //rowa.classList.add("row");                    
+            rowb.classList.add("col-xs-8");
+            rowc.classList.add("col-xs-4");
+            rowc.innerText = element[1];
+            
+            rowb.appendChild(a);            
+            rowa.appendChild(rowb);
+            //rowa.appendChild(rowc);
+            divres.appendChild(rowa);
+        }
+    }
+
+    function getcarp(){        
+            
+        $.ajax({
+            type : 'POST',
+            url : "{{url_for('getcarp')}}",
+            contentType: 'application/json;charset=UTF-8',
+            data: "",            
+            success: function (data) {      
+                datos = JSON.parse(data);
+                datos.forEach(fn);
+                }                    
+        });             
+        
+        var divres = document.getElementById("divresc");    
+        divres.innerHTML="";                               
+        function fn(element, index) {
+            var rowa = document.createElement("div");
+            var rowb = document.createElement("div");
+            var rowc = document.createElement("div");
+            var a = document.createElement("a");
+            var ico = document.createElement("span");
+            
+            a.href="../?c=" + element[1] + "";
+            a.innerText = element[0] ;
+            //rowa.classList.add("row");                    
+            rowb.classList.add("col-xs-8");
+            //rowc.classList.add("col-xs-4");
+            //<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+            ico.classList ="glyphicon glyphicon-folder-close";
+            ico.innerText = " ";
+            rowc.innerText = element[1];
+
+            rowb.appendChild(ico);
+            rowb.appendChild(a);            
+            rowa.appendChild(rowb);
+            //rowa.appendChild(rowc);
+            divres.appendChild(rowa);
+        }
+    }
+
+
+
+    
+    
+</script>
+
+{{super()}}
+{% endblock %}
+
+

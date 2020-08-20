@@ -1,0 +1,263 @@
+{% extends "layout.html" %}
+{% block title %}
+<title>Playn</title>
+{% endblock %}
+
+{% block content %}
+<div class="message" id="messageid"></div>        
+
+<div class="container">
+    <header >                
+        <nav id="navbar" style="display:flex;flex-wrap: wrap;">
+            <a href="{{url_for('home')}}" >Musica</a>|
+            <a href="{{url_for('buscar')}}">Buscar</a>|
+            <a href="{{url_for('radio')}}" >Radio</a>|
+            <!---<a href="javascript:vol(this)" id="mvol" >Vol</a>       
+            <div id="vol" >
+                <input type="range"  min="0" max="100" value="100" onchange="setvolume(this)">    
+            </div> -->
+        </nav>
+        <hr style="margin: 2px;">
+        <nav id="navcontrols">
+            <input type="button" value="Prev" onclick="clickbutton(this)">
+            <input type="button" value="Play" onclick="clickbutton(this)">                                        
+            <input type="button" value="Stop" onclick="clickbutton(this)">
+            <input type="button" value="Next" onclick="clickbutton(this)">            
+            <!--<input type="button" onclick="enviar()" value="enviar"/>-->
+            <span>|</span>
+            <input type="button" id="idtext" value="">
+
+        </nav>                   
+    </header>                  
+
+    <div class="main">            
+        {% if sou == "b" %}
+            <form action="javascript:buscar()"      >
+                <input type="text" id="txtbuscar" class="" />
+                <input type="submit" value="Buscar" id="btnbuscar"  >
+            </form>
+            <div >
+                <hr/>
+                <div id="divres"></div>                
+            </div>
+        {% endif %}
+
+        {% for l in lista %}
+            {% if l.prim %}
+                <div id="f{{l.n}}" class="tit" onclick="playfold(this)">{{ l.carpeta }}</div>
+            {% endif %}
+
+            {% if sou != "b" %}
+                <article id="{{l.n}}"> 
+                    <!--<input type="checkbox" id="ch{{l.n}}">-->
+                    <span onclick="playone(this, '{{l.n}}' )">{{ l.nombre }}</span>            
+                    <span style="visibility: hidden;">{{l.n}}</span>
+                </article>                                
+            {% endif %}
+        {% endfor %}                
+    </div>               
+    <div class="side"> 
+    </div>
+    <footer></footer>
+</div>
+<input type="text" style="display: none;" value="{{sou}}">
+
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+    window.onload = function(){
+        
+        getcurrplay();
+
+        var d = window.location.search.indexOf("?c=", 0);
+        if(d >= 0) {
+            var q = window.location.search.slice(d + 3, window.location.search.length );
+            window.location = "#" + (q-6);
+            playone(document.getElementById(q).children[0],q);            
+        }
+
+        
+    }
+    //-----------------------------
+    function playfold(e){                        
+        window.location += "../?c=" + e.id.substring(1);
+    }
+    function playone(e, n)    {
+        
+        var url = "{{url_for('playone')}}";
+        if ('{{sou}}' == 'r')
+            url = "{{url_for('radioplayone')}}";        
+
+        var XMLHTTPReadyState_COMPLETE = 4;
+        var xReq = new XMLHttpRequest();
+        xReq.open("POST", url, true);
+        xReq.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xReq.ontimeout = function () {
+            success(null, "Request Timed out");
+        }
+        xReq.onreadystatechange = function (e) {
+            if (xReq.readyState == XMLHTTPReadyState_COMPLETE) {
+                if (xReq.status = "200") {                                            
+                    document.getElementById("idtext").value = xReq.response;
+                } else {                    
+                    console.log(xReq.statusText);
+                }
+            }
+        }
+        xReq.send(JSON.stringify({ 'datos': n}));        
+        anim(e);
+    }        
+    function anim(element)  {
+
+        element.classList.remove("articleb");
+        element.classList.add("articlea");
+        setTimeout(() => {
+            element.classList.remove("articlea");
+            element.classList.add("articleb");  
+        }, 500);        
+    }
+    function clickbutton(e){
+        var but = e.value;
+        var url = "{{url_for('buttonpanel')}}";            
+        var XMLHTTPReadyState_COMPLETE = 4;
+        var xReq = new XMLHttpRequest();
+        if ('{{sou}}' == 'r'){            
+            if(but == 'Stop')
+                but = 'Stopr';
+            else
+                but='';
+        }
+
+        xReq.open("GET", url + "?" + "button=" + but, true);
+        xReq.send();
+
+        getcurrplay();
+        //------------------------
+        var mess = document.getElementById("messageid");
+                mess.innerText = e.value;
+                mess.classList.remove("messageb");
+                mess.classList.add("messagea");
+                setTimeout(() => {
+                    mess.classList.remove("messagea");
+                    mess.classList.add("messageb");  
+                }, 800); 
+    }
+
+    function vol(e) {
+        var menuVol = document.getElementById("mvol");    //menu vol
+        var inp = document.getElementById("vol");   //range
+        if(inp.style.display == "none" || inp.style.display == "")
+            inp.style.display = "inline-block";                             
+        else
+            inp.style.display = "none";              
+    }
+    function updcurrplay()   {
+            setInterval(getcurrplay , 2000);
+    }
+    function getcurrplay()    {   
+
+        var url = "{{url_for('getcurrplay')}}";        
+        var XMLHTTPReadyState_COMPLETE = 4;
+        var xReq = new XMLHttpRequest();
+        xReq.open("GET", url, true);
+
+        xReq.onreadystatechange = function (e) {
+            if (xReq.readyState == XMLHTTPReadyState_COMPLETE) {
+                if (xReq.status = "200") {                    
+                    var obj = JSON.parse(xReq.response)    ;
+                    document.getElementById("idtext").value = obj.nombre;
+                } else {
+                    document.getElementById("idtext").value = "";
+                }
+            }
+        }
+        xReq.send();
+    }    
+    function buscar(){
+        
+        var text = document.getElementById("txtbuscar").value;
+        
+        var url = "{{url_for('buscarn')}}";            
+        var XMLHTTPReadyState_COMPLETE = 4;
+        var xReq = new XMLHttpRequest();
+        xReq.open("POST", url, true);
+        xReq.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        var divres = document.getElementById("divres");    
+        divres.innerHTML="";
+
+        xReq.onreadystatechange = function (e) {
+            if (xReq.readyState == XMLHTTPReadyState_COMPLETE) {
+                if (xReq.status = "200") {
+
+                    data = JSON.parse(xReq.response);
+                    data.forEach(fn);
+                } else {                    
+                    console.log(xReq.statusText);
+                }
+            }
+        }
+
+        xReq.send(text);
+
+        function fn(element, index) {
+            var row = document.createElement("article");            
+            var a = document.createElement("a");
+            
+            a.href="../?c=" + element[2] + "";
+            a.innerText = element[0] ;            
+            a.style.textDecoration = "none";
+            //rowc.innerText = element[1];            
+            row.appendChild(a);                        
+            divres.appendChild(row);
+        }
+    }
+               
+
+    function enviar(){
+
+        arr=[];
+        let els = document.querySelectorAll("input[type=checkbox]");
+        els.forEach((v) => {                
+            if(v.checked) {
+                var o = {
+                    n:v.id.substring(2, v.id.length),
+                    carpeta:'',
+                    nombre:'',
+                    nombrecompl:'',
+                    prim:0
+                }                    
+                arr.push(o);
+            }
+        });
+
+        var url = "{{url_for('postsel')}}";            
+        var XMLHTTPReadyState_COMPLETE = 4;
+        var xReq = new XMLHttpRequest();
+        xReq.open("POST", url, true);
+        xReq.timeout = 2000;
+        xReq.ontimeout = function () {
+            success(null, "Request Timed out");
+        }
+        xReq.onreadystatechange = function (e) {
+            if (xReq.readyState == XMLHTTPReadyState_COMPLETE) {
+                if (xReq.status = "200") {                        
+                    success(xReq.response, xReq.statusText);
+
+                } else {
+                    success(null, xReq.statusText);
+                }
+            }
+        }
+        xReq.send(JSON.stringify(arr));
+    }
+
+
+</script>
+
+{{super()}}
+{% endblock %}
+
+

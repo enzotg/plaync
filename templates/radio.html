@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% block title %}
+<title>Radio</title>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="btn-group" role="group" aria-label="..." >
+        <input type="button" value="Stop " onclick="stop()"  class="btn btn-sm btn-primary">
+    </div>
+
+    <hr/>
+
+    <div class="btn-group">        
+
+    </div>
+    <hr/>  
+            
+        {% for l in lista %}
+            <div class="row">        
+                <div class="col-xs-12 ">
+                    <div style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;">                            
+                        <a href="javascript:void(0)" onclick="playone( '{{l.n}}' )" >{{ l.nombre }}</a>    
+                        <span style="visibility: hidden;">{{l.n}}</span>
+                    </div>
+                </div>
+            </div>                
+        {% endfor %}
+
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+    
+        function playone(e)
+        {
+            $.ajax({
+                type : 'POST',
+                url : "{{url_for('radioplayone')}}",
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify({ 'datos': e}),            
+                success: function (data) {
+                    document.getElementById("estador").innerText=data;                    
+                }
+            });
+        }        
+        function setvolume(e)
+        {            
+            $.ajax({
+                type : 'POST',
+                url : "{{url_for('volume')}}",
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify({ 'datos': e.value }),            
+                success: function (data) {
+                    document.getElementById("estador").innerText=data;                    
+                }
+            });
+        }      
+        function getvolume()        
+        {            
+            $.ajax({
+                type : 'POST',
+                url : "{{url_for('getvolume')}}",
+                contentType: 'application/json;charset=UTF-8',                
+                success: function (data) {
+                    if(document.getElementById("vol").value != data)
+                        document.getElementById("vol").value = data;
+                }
+            });
+        }      
+
+        function stop()
+        {
+            $.ajax({
+                type : 'POST',
+                url : "{{url_for('radiostop')}}",
+                contentType: 'application/json;charset=UTF-8',                
+                success: function (data) {
+                    document.getElementById("estador").innerText=data;
+                }
+            });
+        }
+               
+
+
+</script>
+
+{{super()}}
+{% endblock %}
+
+
