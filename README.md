@@ -1,8 +1,8 @@
 # plaync
-This app is intended to set a raspberry pi like a centralized mp3 player. The interfaz is via web.
-The pi play the music sending the sound by its audio output.
-The app is in a flask server. 
-
+This app is a web page that plays mp3 files on the server.</br>
+The server plays the music sending the sound by its audio output.</br>
+The server could be installed in a Raspberry.</br>
+The server is flask.
 To start the app in a pi:
 cd /home/pi/plaync
 export set FLASK_APP=/home/pi/plaync/play
